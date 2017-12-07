@@ -1,5 +1,6 @@
 import pygame, sys
 from pygame.locals import *
+import random
 
 pygame.init()
 DISP_RECT = (400, 300)
@@ -15,19 +16,33 @@ FPS = 30 # frames per second setting
 fpsClock = pygame.time.Clock()
 
 fontObj = pygame.font.Font('freesansbold.ttf', 16)
-textSurfaceObj = fontObj.render('Hello world!', True, GREEN, BLACK)
-textRectObj = textSurfaceObj.get_rect()
-textRectObj.top, textRectObj.centerx = 0, DISP_RECT[1]/2
+
+
+class Char(pygame.sprite.Sprite):
+    def __init__(self, ch, pos):
+        super(Char, self).__init__()
+        self.surf = fontObj.render(ch, True, GREEN, BLACK)
+        self.rect = self.surf.get_rect()
+        self.speed = random.randint(1, 10)
+        self.rect.top, self.rect.left = 0, pos*14
+
+    def update(self):
+        self.rect.move_ip(0, self.speed)
+        if self.rect.bottom >= DISP_RECT[1]:
+            self.rect.top = 0
+
+
+chars = pygame.sprite.Group()
+for i in range(0, 26):
+    ch1 = Char(chr(i+ord('A')), i)
+    chars.add(ch1)
 
 while True: # main game loop
-    #Update object
-    textRectObj.top = textRectObj.top + 2
-    if textRectObj.bottom >= DISP_RECT[0]:
-        textRectObj.top = 1
-    
+
     # Update drawing
     DISPLAYSURF.fill(BLACK)
-    DISPLAYSURF.blit(textSurfaceObj, textRectObj)
+    for entity in chars:
+        DISPLAYSURF.blit(entity.surf, entity.rect)
     pygame.display.update()
     
     # Control FPS
@@ -38,3 +53,6 @@ while True: # main game loop
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+    
+    # Update Sprite
+    chars.update()
